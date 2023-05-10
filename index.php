@@ -1,10 +1,13 @@
 <?php
+session_start();
 include('conn.php');
 // echo "<script>alert('ok')</script>";
-
 //inclusão das funções
-
 include('funcoes.php');
+//iniciar secão
+if(!isset($_SESSION["usuario"])){
+  header('location:login.php?msg=userna');
+}
 
 
 //Atualizar tarefa
@@ -17,7 +20,7 @@ if (isset($_GET["btnAlterar"])) {
   ) {
 
     $nomeT = testar_valor($_GET["nometarefa"]);
-    $descT = testar_valor( $_GET["descricao"]);
+    $descT = testar_valor($_GET["descricao"]);
     $dataT = testar_valor($_GET["datatarefa"]);
     $priorT = testar_valor($_GET["prioridade"]);
     $idT =  testar_valor($_GET["idtarefa"]);
@@ -37,7 +40,6 @@ if (isset($_GET["btnAlterar"])) {
   }
 }
 
-
 //Deletar tarefa
 if (isset($_GET["idtarefaexc"])) {
 
@@ -54,7 +56,6 @@ if (isset($_GET["idtarefaexc"])) {
   }
 }
 
-
 //Buscar Tarefa pela data
 if (isset($_GET["btnBuscar"])) {
   $dataT = $_GET["dataBuscar"];
@@ -67,6 +68,14 @@ if (isset($_GET["btnBuscar"])) {
   $result = mysqli_query($conn, $sqlSelect);
 }
 
+//paginação
+$pag = (isset($_GET["pagina"]) ? $_GET["pagina"] : 1);
+$quantReg = mysqli_num_rows($result);
+$quant_p_pag = 7;
+$quant_pag = ceil($quantReg / $quant_p_pag);
+$incio = ($quant_p_pag * $pag) - $quant_p_pag;
+$sqlPag = "SELECT * FROM tab_tarefas LIMIT $incio, $quant_p_pag";
+$result = mysqli_query($conn, $sqlPag);
 
 
 ?>
@@ -275,7 +284,7 @@ if (isset($_GET["btnBuscar"])) {
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
                         <a href="index.php?idtarefaexc=<?php echo $linha["id"] ?>">
-                        <button type="submit" class="btn btn-danger">Sim</button>
+                          <button type="submit" class="btn btn-danger">Sim</button>
                         </a>
                       </div>
                     </div>
@@ -287,25 +296,74 @@ if (isset($_GET["btnBuscar"])) {
             </tbody>
           </table>
 
+          <!-- paginação -->
           <div class="container mt-5">
             <nav aria-label="Page navigation example">
               <ul class="pagination justify-content-center">
-                <li class="page-item">
-                  <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                  </a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                  <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                  </a>
-                </li>
+                <!-- voltar pagina  -->
+                <?php
+                $pagAnt = $pag - 1;
+                
+                if ($pagAnt != 0) {
+
+                ?>
+
+                  <li class="page-item">
+                    <a class="page-link" href="index.php?pagina=<?= $pagAnt;?>"">
+                    <span aria-hidden=" true">&laquo;</span>
+                    </a>
+                  </li>
+
+                <?php } else { ?>
+
+                  <li class="page-item">
+                    <a class="page-link">
+                      <span aria-hidden=" true">&laquo;</span>
+                    </a>
+                  </li>
+
+
+                <?php } ?>
+                <!--  -->
+
+                <!-- paginas -->
+                <?php for ($i = 1; $i <= $quant_pag; $i++) { ?>
+                  <li class="page-item <?php if($pag == $i) echo "active"?>">
+                    <a class="page-link" href="index.php?pagina=<?= $i ?>">
+                      <?= $i ?>
+                    </a>
+                  </li>
+
+                <?php }
+                // avançar pagina 
+                $pagPost = $pag + 1;
+
+                if ($pagPost <= $quant_pag) {
+
+                ?>
+
+                  <li class="page-item">
+                    <a class="page-link" href="index.php?pagina=<?= $pagPost?>">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+
+                <?php } else { ?>
+
+                  <li class="page-item">
+                    <a class="page-link" href="#">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+
+                <?php } ?>
+
               </ul>
             </nav>
           </div>
+
+          <!-- Fim de paginação -->
+
 
           <div class="modal fade" id="exampleModa2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
