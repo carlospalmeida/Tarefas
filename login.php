@@ -13,7 +13,10 @@ if (isset($_POST["btnacessar"])) {
     $quantReg = mysqli_num_rows($result);
     if ($quantReg > 0) {
         $_SESSION["usuario"] = "$usuario";
-        $_SESSION["idUsuario"] = "1";
+        while ($linha = mysqli_fetch_assoc($result)) {
+            $_SESSION["idUsuario"] = $linha["idUser"];
+        }
+
         header('location:index.php');
     } else {
         header('location:login.php?msg=logierro');
@@ -141,12 +144,12 @@ if (isset($_POST["btnacessar"])) {
         <input type="checkbox" id="chk" aria-hidden="true">
 
         <?php if (isset($_GET["msg"]) && $_GET["msg"] == "logierro") { ?>
-                <p style="color: red; text-align: center;">Usuario ou senha incorreta</p>
-            <?php } ?>
-            <?php if (isset($_GET["msg"]) && $_GET["msg"] == "userna") { ?>
-                <p style="color: red; text-align: center;">Faz isso não fi, <br> ta achando que comecei ontem né?</p>
-            <?php } ?>
-            
+            <p style="color: red; text-align: center;">Usuario ou senha incorreta</p>
+        <?php } ?>
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "userna") { ?>
+            <p style="color: red; text-align: center;">Faz isso não fi,ta achando que comecei ontem né?</p>
+        <?php } ?>
+
         <div class="signup">
             <form method="post">
                 <label for="chk" aria-hidden="true">Cadastrar</label>
