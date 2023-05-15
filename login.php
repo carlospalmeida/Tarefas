@@ -23,6 +23,37 @@ if (isset($_POST["btnacessar"])) {
     }
 }
 
+if (isset($_POST["btncadastrar"])) {
+    $Nusuario = testar_valor($_POST["Nusuario"]);
+    $Nsenha = testar_valor($_POST["Nsenha"]);
+    $Csenha = testar_valor($_POST["Csenha"]);
+
+    if(!empty($Nusuario) && !empty($Nsenha) && !empty($Csenha)){
+        if ($Nsenha == $Csenha) {
+            $sqlUser = "SELECT * FROM tab_usuarios WHERE usuario='$Nusuario'";
+            $result = mysqli_query($conn, $sqlUser);
+    
+            if (mysqli_num_rows($result) == 0) {
+                $sqlCadastrar = "INSERT INTO tab_usuarios (usuario,senha) VALUES ('$Nusuario','$Nsenha')";
+                if (mysqli_query($conn, $sqlCadastrar)) {
+                    header('location:login.php?msg=Cadok');
+                } else {
+                    header('location:login.php?msg=erro3');
+                }
+            } else {
+                header('location:login.php?msg=erro2');
+            }
+        } else {
+            header('location:login.php?msg=erro1');
+        }
+    }else{
+        header('location:login.php?msg=erro0');
+    }
+
+
+}
+
+
 ?>
 
 
@@ -143,19 +174,45 @@ if (isset($_POST["btnacessar"])) {
     <div class="main">
         <input type="checkbox" id="chk" aria-hidden="true">
 
+        <!-- Erros e msgs -->
+
         <?php if (isset($_GET["msg"]) && $_GET["msg"] == "logierro") { ?>
             <p style="color: red; text-align: center;">Usuario ou senha incorreta</p>
         <?php } ?>
+
         <?php if (isset($_GET["msg"]) && $_GET["msg"] == "userna") { ?>
             <p style="color: red; text-align: center;">Faz isso não fi,ta achando que comecei ontem né?</p>
         <?php } ?>
 
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erro0") { ?>
+            <p style="color: red; text-align: center;">Preencha todos os campos!!</p>
+        <?php } ?>
+
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erro1") { ?>
+            <p style="color: red; text-align: center;">Senha não é igual!!</p>
+        <?php } ?>
+
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erro2") { ?>
+            <p style="color: red; text-align: center;">Usuario já existe!!</p>
+        <?php } ?>
+
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erro3") { ?>
+            <p style="color: red; text-align: center;">Erro no Banco!!</p>
+        <?php } ?>
+
+        <?php if (isset($_GET["msg"]) && $_GET["msg"] == "Cadok") { ?>
+            <p style="color: green; text-align: center;">Sucesso no cadastro!!</p>
+        <?php } ?>
+
+        <!-- X -->
+
         <div class="signup">
             <form method="post">
                 <label for="chk" aria-hidden="true">Cadastrar</label>
-                <input type="text" placeholder="Nome de usuario" id="usuario">
-                <input type="password" placeholder="Senha" id="senha">
-                <button>Cadastro</button>
+                <input type="text" name="Nusuario" placeholder="Nome de usuario" id="usuarioc">
+                <input type="password" name="Nsenha" placeholder="Senha" id="senhac">
+                <input type="password" name="Csenha" placeholder="Confirmar Senha" id="senhaconfir">
+                <button type="submit" name="btncadastrar">Cadastro</button>
             </form>
         </div>
 

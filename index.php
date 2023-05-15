@@ -74,7 +74,7 @@ if (isset($_GET["idfinalizar"])) {
 $id = $_SESSION["idUsuario"];
 
 //Tarefas Finalizadas
-$statusT = (isset($_GET["idtarefac"]) && $_GET["idtarefac"] != "0") ? 1 : 0;
+$statusT = (isset($_GET["idtarefac"]) && $_GET["idtarefac"] == "1") ? 1 : 0;
 
 
 //Buscar Tarefa pela data
@@ -89,14 +89,48 @@ if (isset($_GET["btnBuscar"])) {
   $result = mysqli_query($conn, $sqlSelect);
 }
 
+//alterar dados do usuario
+if (isset($_GET["btnsalvarconfig"])) {
+  $idU = $_GET["idUser"];
+  $userN = $_GET["usuario"];
+  $senhaA = $_GET["senhaAtual"];
+  $novaSenha = $_GET["novaSenha"];
+
+  if (!empty($senhaA) && !empty($novaSenha)) {
+    if ($senhaA != $novaSenha) {
+      $sqlVerificarSenha = "SELECT * FROM tab_usuarios WHERE senha='$senhaA' and idUser='$idU'";
+      $result = mysqli_query($conn, $sqlVerificarSenha);
+
+      if (mysqli_num_rows($result) > 0) {
+        $sqlAltSenha = "UPDATE tab_usuarios SET senha='$novaSenha' WHERE idUser='$idU'";
+      } else {
+        header('location:index.php?msg=erroaltsenha4');
+      }
+
+      if (mysqli_query($conn, $sqlAltSenha)) {
+        header('location:index.php?msg=senhaok');
+      } else {
+        header('location:index.php?msg=erroaltsenha3');
+      }
+    } else {
+      header('location:index.php?msg=erroaltsenha2');
+    }
+  } else {
+    header('location:index.php?msg=erroaltsenha1');
+  }
+}
+
+
+
+
 //paginação
-  $pag = (isset($_GET["pagina"]) ? $_GET["pagina"] : 1);
-  $quantReg = mysqli_num_rows($result);
-  $quant_p_pag = 7;
-  $quant_pag = ceil($quantReg / $quant_p_pag);
-  $incio = ($quant_p_pag * $pag) - $quant_p_pag;
-  $sqlPag = "SELECT * FROM tab_tarefas WHERE idUsuario='$id'and statusTarefa='$statusT' LIMIT $incio, $quant_p_pag";
-  $result = mysqli_query($conn, $sqlPag);
+$pag = (isset($_GET["pagina"]) ? $_GET["pagina"] : 1);
+$quantReg = mysqli_num_rows($result);
+$quant_p_pag = 7;
+$quant_pag = ceil($quantReg / $quant_p_pag);
+$incio = ($quant_p_pag * $pag) - $quant_p_pag;
+$sqlPag = "SELECT * FROM tab_tarefas WHERE idUsuario='$id'and statusTarefa='$statusT' LIMIT $incio, $quant_p_pag";
+$result = mysqli_query($conn, $sqlPag);
 
 
 ?>
@@ -138,7 +172,7 @@ if (isset($_GET["btnBuscar"])) {
             <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
               <nav class="sb-sidenav-menu-nested nav">
                 <a class="nav-link" href="">Cadastro de Tarefas</a>
-                <a class="nav-link" href="index.php?idtarefac">Tarefas concluídas</a>
+                <a class="nav-link" href="index.php?idtarefac=1">Tarefas concluídas</a>
               </nav>
             </div>
           </div>
@@ -150,8 +184,10 @@ if (isset($_GET["btnBuscar"])) {
     <div id="layoutSidenav_content">
       <main>
         <div class="container-fluid px-4">
-          <h1 class="mt-4">Gerenciador de tarefas</h1>
+          <h1 class="mt-4">Gerenciador de tarefas<?php if ($statusT == 1) { echo " - Tarefas Finalizadas";} ?></h1>
 
+          <!-- mensagems de erro e sucesso -->
+          
           <?php if (isset($_GET["msg"]) && $_GET["msg"] == "cadok") { ?>
             <div class="alert alert-success" role="alert">
               Cadastro Realizado com sucesso!!!
@@ -163,7 +199,6 @@ if (isset($_GET["btnBuscar"])) {
               Atualização realizada com sucesso!!!
             </div>
           <?php } ?>
-
 
           <?php if (isset($_GET["msg"]) && $_GET["msg"] == "uperro1") { ?>
             <div class="alert alert-danger" role="alert">
@@ -200,6 +235,36 @@ if (isset($_GET["btnBuscar"])) {
             </div>
           <?php } ?>
 
+          <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erroaltsenha1") { ?>
+            <div class="alert alert-danger" role="alert">
+              Preencha todos os campos para alterar a senha !!!!!
+            </div>
+          <?php } ?>
+
+          <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erroaltsenha2") { ?>
+            <div class="alert alert-danger" role="alert">
+              Nova senha não pode ser igual a atual!!!!!
+            </div>
+          <?php } ?>
+
+          <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erroaltsenha3") { ?>
+            <div class="alert alert-danger" role="alert">
+              Senha atual esta incorreta !!!!!
+            </div>
+          <?php } ?>
+
+          <?php if (isset($_GET["msg"]) && $_GET["msg"] == "erroaltsenha4") { ?>
+            <div class="alert alert-danger" role="alert">
+              Senha incorreta!!!!!
+            </div>
+          <?php } ?>
+
+          <?php if (isset($_GET["msg"]) && $_GET["msg"] == "senhaok") { ?>
+            <div class="alert alert-success" role="alert">
+              Senha alterada com sucesso!!!!!
+            </div>
+          <?php } ?>
+
           <ol class="breadcrumb mb-4">
           </ol>
 
@@ -228,7 +293,9 @@ if (isset($_GET["btnBuscar"])) {
                 $modalDeletar = "modalDeletar" . $linha["id"];
                 $modalfinalizar = "modalfinalizar" . $linha["id"];
               ?>
-                <tr>
+                <tr class="<?php if ($statusT == 1) {
+                              echo "table-success";
+                            } ?>">
                   <th style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#<?php echo $modalAtualizar ?>">
                     <i class="fa-solid fa-pen" style="color: #236c1e;"></i>
                   </th>
@@ -249,8 +316,16 @@ if (isset($_GET["btnBuscar"])) {
                       ?></td>
                   <td>
                     <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" data-bs-toggle="modal" data-bs-target="#<?= $modalfinalizar ?>" role="switch" id="flexSwitchCheckChecked">
-                      <label class="form-check-label" for="flexSwitchCheckChecked">Finalizar</label>
+
+                      <?php if ($statusT == 0) { ?>
+
+                        <input class="form-check-input" type="checkbox" data-bs-toggle="modal" data-bs-target="#<?= $modalfinalizar ?>" role="switch" id="flexSwitchCheckChecked">
+                        <label class="form-check-label" for="flexSwitchCheckChecked">Finalizar</label>
+
+                      <?php } else { ?>
+                        <label class="form-check-label" for="flexSwitchCheckChecked"><strong>Finalizado</strong></label>
+                      <?php  } ?>
+
                     </div>
                   </td>
                 </tr>
@@ -364,8 +439,8 @@ if (isset($_GET["btnBuscar"])) {
                 ?>
 
                   <li class="page-item">
-                    <a class="page-link" href="index.php?pagina=<?= $pagAnt; ?>"">
-                    <span aria-hidden=" true">&laquo;</span>
+                    <a class="page-link" href="index.php?pagina=<?= $pagAnt; ?>" &idtarefac=<?= $statusT ?>">
+                      <span aria-hidden=" true">&laquo;</span>
                     </a>
                   </li>
 
@@ -398,7 +473,7 @@ if (isset($_GET["btnBuscar"])) {
                 ?>
 
                   <li class="page-item">
-                    <a class="page-link" href="index.php?pagina=<?= $pagPost ?>">
+                    <a class="page-link" href="index.php?pagina=<?= $pagPost ?>&idtarefac=<?= $statusT ?>">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
@@ -475,6 +550,48 @@ if (isset($_GET["btnBuscar"])) {
           </div>
         </div>
       </div>
+
+      <div class="modal fade text-dark" id="modalConfiguracoes" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog text-dark">
+          <div class="modal-content text-dark">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Configurações do usuário</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+              <form class="form-group text-white">
+                <div class="mb-3">
+                  <label class="form-label text-dark">ID do Usuario</label>
+                  <input type="text" class="form-control" name="idUser" value="<?= $_SESSION["idUsuario"] ?>" readonly>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-dark">Nome do Usuario</label>
+                  <input type="text" class="form-control" name="usuario" readonly value="<?= $_SESSION["usuario"] ?>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-dark">Senha Atual</label>
+                  <input type="text" class="form-control" name="senhaAtual">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-dark">Nova senha</label>
+                  <input type="text" class="form-control" name="novaSenha">
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+              <button type="submit" name="btnsalvarconfig" class="btn btn-primary">Salvar</button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Optional: Place to the bottom of scripts -->
+      <script>
+        const myModal = new bootstrap.Modal(document.getElementById('modalId'), options)
+      </script>
+
 
 
     </div>
