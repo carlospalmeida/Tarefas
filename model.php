@@ -27,6 +27,6 @@ include('funcoes.php');
       header('location:index.php?msg=caderro');
     }
   } else {
-    echo "<script>alert('Preencha todos os campos !!!')</script>";
+    header('location:index.php?msg=uperro1');
   }
 

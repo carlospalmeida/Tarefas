@@ -7,6 +7,7 @@
     <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
         <div class="input-group">
             <input class="form-control" type="date" name="dataBuscar" />
+            <input type="text" name="idtarefac" value="<?=$statusT?>" hidden>
             <button class="btn btn-danger" name="btnBuscar" type="submit"><i class="fas fa-search"></i></button>
         </div>
     </form>

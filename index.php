@@ -70,18 +70,18 @@ if (isset($_GET["idfinalizar"])) {
     header('location:index.php?msg=finalizarerro');
   }
 }
-
+//id do usuario
 $id = $_SESSION["idUsuario"];
-
 //Tarefas Finalizadas
 $statusT = (isset($_GET["idtarefac"]) && $_GET["idtarefac"] == "1") ? 1 : 0;
-
+//valor data
+$valor = (isset($_GET["btnBuscar"]) ? $_GET["dataBuscar"] : "");
 
 //Buscar Tarefa pela data
 if (isset($_GET["btnBuscar"])) {
   $dataT = $_GET["dataBuscar"];
   $sqlBuscar = "SELECT * FROM tab_tarefas 
-  WHERE prazoTarefa LIKE '$dataT%' and idUsuario='$id' and statusTarefa='$statusT' ";
+  WHERE prazoTarefa LIKE '$dataT%' and idUsuario='$id' and statusTarefa='$statusT'";
   $result = mysqli_query($conn, $sqlBuscar);
 } else {
   //Selecionar tarefas do banco - php
@@ -129,7 +129,10 @@ $quantReg = mysqli_num_rows($result);
 $quant_p_pag = 7;
 $quant_pag = ceil($quantReg / $quant_p_pag);
 $incio = ($quant_p_pag * $pag) - $quant_p_pag;
-$sqlPag = "SELECT * FROM tab_tarefas WHERE idUsuario='$id'and statusTarefa='$statusT' LIMIT $incio, $quant_p_pag";
+$sqlPag = "SELECT * FROM tab_tarefas WHERE idUsuario='$id'
+and statusTarefa='$statusT' 
+and prazoTarefa LIKE '$valor%' 
+LIMIT $incio, $quant_p_pag";
 $result = mysqli_query($conn, $sqlPag);
 
 
@@ -171,7 +174,7 @@ $result = mysqli_query($conn, $sqlPag);
             </a>
             <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
               <nav class="sb-sidenav-menu-nested nav">
-                <a class="nav-link" href="">Cadastro de Tarefas</a>
+                <a class="nav-link" href="index.php">Cadastro de Tarefas</a>
                 <a class="nav-link" href="index.php?idtarefac=1">Tarefas concluídas</a>
               </nav>
             </div>
@@ -184,10 +187,12 @@ $result = mysqli_query($conn, $sqlPag);
     <div id="layoutSidenav_content">
       <main>
         <div class="container-fluid px-4">
-          <h1 class="mt-4">Gerenciador de tarefas<?php if ($statusT == 1) { echo " - Tarefas Finalizadas";} ?></h1>
+          <h1 class="mt-4">Gerenciador de tarefas<?php if ($statusT == 1) {
+                                                    echo " - Tarefas Finalizadas";
+                                                  } ?></h1>
 
           <!-- mensagems de erro e sucesso -->
-          
+
           <?php if (isset($_GET["msg"]) && $_GET["msg"] == "cadok") { ?>
             <div class="alert alert-success" role="alert">
               Cadastro Realizado com sucesso!!!
@@ -292,10 +297,23 @@ $result = mysqli_query($conn, $sqlPag);
                 $modalAtualizar = "modalAtualizar" . $linha["id"];
                 $modalDeletar = "modalDeletar" . $linha["id"];
                 $modalfinalizar = "modalfinalizar" . $linha["id"];
+                $dataTarefa = new DateTime($linha["prazoTarefa"]);
+                $dataAtual = new DateTime('now');
+
+                $dataTFormat = $dataTarefa->format('d/m/Y H:i');
               ?>
                 <tr class="<?php if ($statusT == 1) {
-                              echo "table-success";
-                            } ?>">
+                              echo "table-dark table-borderless";
+                            } else {
+                              if ($linha["priorTarefa"] == 1) {
+                                echo "table-success";
+                              } else if ($linha["priorTarefa"] == 2) {
+                                echo "table-warning";
+                              }else{
+                                echo "table-danger";
+                              }
+                            }
+                            ?>">
                   <th style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#<?php echo $modalAtualizar ?>">
                     <i class="fa-solid fa-pen" style="color: #236c1e;"></i>
                   </th>
@@ -304,7 +322,7 @@ $result = mysqli_query($conn, $sqlPag);
                   </th>
                   <td><?php echo $linha["nomeTarefa"] ?></td>
                   <td><?php echo $linha["descTarefa"] ?></td>
-                  <td><?php echo $linha["prazoTarefa"] ?></td>
+                  <td><?php echo $dataTFormat ?></td>
                   <td><?php
                       if ($linha["priorTarefa"] == 1) {
                         echo "Baixa";
@@ -529,7 +547,7 @@ $result = mysqli_query($conn, $sqlPag);
                 <div class="row">
                   <div class="mb-3 col-6">
                     <label class="form-label text-dark">Data / Prazo</label>
-                    <input type="datetime-local" value="<?= date("Y-m-d\TH:i:s") ?>" class="form-control" name="datatarefa">
+                    <input type="datetime-local" value="<?= date("Y-m-d\TH:i") ?>" class="form-control" name="datatarefa">
                   </div>
                   <div class="mb-3 col-6">
                     <label class="form-label text-dark">Prioridade</label>
