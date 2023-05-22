@@ -176,7 +176,10 @@ $result = mysqli_query($conn, $sqlPag);
               <nav class="sb-sidenav-menu-nested nav">
                 <a class="nav-link" href="index.php">Cadastro de Tarefas</a>
                 <a class="nav-link" href="index.php?idtarefac=1">Tarefas concluídas</a>
-              </nav>
+                <a class="nav-link" href="relatorio.php">Relatório de Tarefas</a>
+                <a class="nav-link" href="relatoriodia.php">Relatório de Tarefas Abertas</a>
+                <a class="nav-link" href="relatoriof.php">Relatório de Tarefas Finalizadas</a>
+              </nav>  
             </div>
           </div>
         </div>
@@ -539,10 +542,10 @@ $result = mysqli_query($conn, $sqlPag);
               <form class="form-group text-white" action="model.php">
                 <div class="mb-3">
                   <label class="form-label text-dark">Nome da Tarefa</label>
-                  <input type="text" class="form-control" name="nometarefa">
+                  <input type="text" class="form-control" name="nometarefa" maxlength="50">
                 </div>
                 <div class="mb-3">
-                  <label class="form-label text-dark">Descrição da tarefa</label> <textarea class="form-control" name="descricao" rows="3"></textarea>
+                  <label class="form-label text-dark">Descrição da tarefa</label> <textarea class="form-control" name="descricao" rows="3" maxlength="200"></textarea>
                 </div>
                 <div class="row">
                   <div class="mb-3 col-6">
