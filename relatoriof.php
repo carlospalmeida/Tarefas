@@ -9,16 +9,18 @@ $result2 = mysqli_query($conn, $sqlNome);
 $idU = $_SESSION["idUsuario"];
 $nomeu = $_SESSION["usuario"];
 
-$sqlRelatorio = "SELECT * FROM tab_tarefas WHERE idUsuario='$idU'";
+$sqlRelatorio = "SELECT * FROM tab_tarefas
+WHERE idUsuario='$idU' AND statusTarefa='1'
+";
 
 $result = mysqli_query($conn, $sqlRelatorio);
 $numTarefas = mysqli_num_rows($result);
 
-$htmlRel = "<h1>Relatorio de Tarefas! <br>
+$htmlRel = "<h1>Relatorio de Tarefas Finalizadas! <br>
                 Usuario:$nomeu <br>
                 Quantidade de tarefas:$numTarefas <br></h1>";
 
-                
+
 while ($linha = mysqli_fetch_assoc($result)) {
     $nome = $linha["nomeTarefa"];
     $desc = $linha["descTarefa"];
@@ -26,22 +28,20 @@ while ($linha = mysqli_fetch_assoc($result)) {
     $prior = $linha["priorTarefa"];
     $status = $linha["statusTarefa"];
     $status = "Tarefa Finalizada";
-    if ($linha["statusTarefa"] == 1) {
 
-        if ($linha["priorTarefa"] == 1) {
-            $prior = "Baixa";
-        } else if ($linha["priorTarefa"] == 2) {
-            $prior = "Média";
-        } else {
-            $prior = "Alta";
-        }
 
-        $htmlRel .= "<p> <strong>Nome da Tarefa:</strong>$nome<br>
+    if ($linha["priorTarefa"] == 1) {
+        $prior = "Baixa";
+    } else if ($linha["priorTarefa"] == 2) {
+        $prior = "Média";
+    } else {
+        $prior = "Alta";
+    }
+
+    $htmlRel .= "<p> <strong>Nome da Tarefa:</strong>$nome<br>
                  <strong>Descrição:</strong>$desc <br>
                  <strong>Prazo da tarefa:</strong>$prazo <br>
-                 <strong>Prioridade:</strong>$prior <br> 
-                 <strong>Status:</strong>$status </p>";
-    }
+                 <strong>Prioridade:</strong>$prior <br>";
 }
 
 // Instancia a classe

@@ -3,19 +3,23 @@ session_start();
 require 'vendor/autoload.php';
 include 'conn.php';
 
+$dataHoje = new DateTime('now');
+$dataf = $dataHoje->format('Y-m-d');
 $idU = $_SESSION["idUsuario"];
 $nomeu = $_SESSION["usuario"];
 
-//nome e quantidade de tarefas
-$sqlNome = "SELECT * FROM tab_usuarios";
-$result2 = mysqli_query($conn, $sqlNome);
 
-$sqlRelatorio = "SELECT * FROM tab_tarefas WHERE idUsuario='$idU'";
+$sqlRelatorio = "SELECT * FROM tab_tarefas 
+WHERE idUsuario='$idU'
+AND statusTarefa='0' 
+AND prazoTarefa LIKE '$dataf%'";
+
+
 
 $result = mysqli_query($conn, $sqlRelatorio);
 $numTarefas = mysqli_num_rows($result);
 
-$htmlRel = "<h1>Relatorio de Tarefas! <br>
+$htmlRel = "<h1>Relatorio de Tarefas em aberto na data atual! <br>
                 Usuario:$nomeu <br>
                 Quantidade de tarefas:$numTarefas <br></h1>";
 
@@ -28,22 +32,21 @@ while ($linha = mysqli_fetch_assoc($result)) {
     $status = $linha["statusTarefa"];
     $prazo = date("y-m-d");
     $status = "Tarefa em aberto";
-    if ($linha["statusTarefa"] == 0) {
-        
-        if ($linha["priorTarefa"] == 1) {
-            $prior = "Baixa";
-        } else if ($linha["priorTarefa"] == 2) {
-            $prior = "Média";
-        } else {
-            $prior = "Alta";
-        }
 
-        $htmlRel .= "<p> <strong>Nome da Tarefa:</strong>$nome<br>
+
+    if ($linha["priorTarefa"] == 1) {
+        $prior = "Baixa";
+    } else if ($linha["priorTarefa"] == 2) {
+        $prior = "Média";
+    } else {
+        $prior = "Alta";
+    }
+
+    $htmlRel .= "<p> <strong>Nome da Tarefa:</strong>$nome<br>
                  <strong>Descrição:</strong>$desc <br>
                  <strong>Prazo da tarefa:</strong>$prazo <br>
                  <strong>Prioridade:</strong>$prior <br> 
                  <strong>Status:</strong>$status </p>";
-    }
 }
 
 // Instancia a classe

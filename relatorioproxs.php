@@ -3,21 +3,29 @@ session_start();
 require 'vendor/autoload.php';
 include 'conn.php';
 
-$sqlNome = "SELECT * FROM tab_usuarios";
-$result2 = mysqli_query($conn, $sqlNome);
+
+$dataHoje = new DateTime('now');
+$dataf = $dataHoje->format('Y-m-d');
+$dataFinal = strtotime("+8 days", time());
+$dataFinalObj = new DateTime(date('Y-m-d',$dataFinal));
+$datafinalf = $dataFinalObj->format('Y-m-d');
 
 $idU = $_SESSION["idUsuario"];
 $nomeu = $_SESSION["usuario"];
 
-$sqlRelatorio = "SELECT * FROM tab_tarefas WHERE idUsuario='$idU'";
+$sqlRelatorio = "SELECT * FROM tab_tarefas 
+WHERE idUsuario='$idU'
+AND statusTarefa='0' 
+AND prazoTarefa >= '$dataf' 
+AND prazoTarefa < '$datafinalf'";
+
 
 $result = mysqli_query($conn, $sqlRelatorio);
 $numTarefas = mysqli_num_rows($result);
 
-$htmlRel = "<h1>Relatorio de Tarefas! <br>
+$htmlRel = "<h1>Relatorio de Tarefas em aberto na data atual! <br>
                 Usuario:$nomeu <br>
-                Quantidade de tarefas no total:$numTarefas <br></h1>";
-
+                Quantidade de tarefas:$numTarefas <br></h1>";
 
 
 while ($linha = mysqli_fetch_assoc($result)) {
@@ -26,8 +34,13 @@ while ($linha = mysqli_fetch_assoc($result)) {
     $prazo = $linha["prazoTarefa"];
     $prior = $linha["priorTarefa"];
     $status = $linha["statusTarefa"];
+    $status = "Tarefa em aberto";
 
-
+    $dataHoje = new DateTime('now');
+    $dataf = $dataHoje->format('Y-m-d');
+    $dataFinal = strtotime("+1 week", time());
+    $dataFinalObj = new DateTime(date('Y-m-d',$dataFinal));
+    $datafinalf = $dataFinalObj->format('Y-m-d');
     if ($linha["priorTarefa"] == 1) {
         $prior = "Baixa";
     } else if ($linha["priorTarefa"] == 2) {
@@ -36,17 +49,11 @@ while ($linha = mysqli_fetch_assoc($result)) {
         $prior = "Alta";
     }
 
-    if ($linha["statusTarefa"] == 1) {
-        $status = "Tarefa Finalizada";
-    } else {
-        $status = "Tarefa em aberto";
-    }
-
     $htmlRel .= "<p> <strong>Nome da Tarefa:</strong>$nome<br>
-                 <strong>Descrição:</strong>$desc <br>
-                 <strong>Prazo da tarefa:</strong>$prazo <br>
-                 <strong>Prioridade:</strong>$prior <br> 
-                 <strong>Status:</strong>$status </p>";
+                     <strong>Descrição:</strong>$desc <br>
+                     <strong>Prazo da tarefa:</strong>$prazo <br>
+                     <strong>Prioridade:</strong>$prior <br> 
+                     <strong>Status:</strong>$status </p>";
 }
 
 // Instancia a classe

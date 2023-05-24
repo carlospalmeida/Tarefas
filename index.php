@@ -177,7 +177,8 @@ $result = mysqli_query($conn, $sqlPag);
                 <a class="nav-link" href="index.php">Cadastro de Tarefas</a>
                 <a class="nav-link" href="index.php?idtarefac=1">Tarefas concluídas</a>
                 <a class="nav-link" href="relatorio.php">Relatório de Tarefas</a>
-                <a class="nav-link" href="relatoriodia.php">Relatório de Tarefas Abertas</a>
+                <a class="nav-link" href="relatoriodia.php">Relatório de Tarefas do DIA</a>
+                <a class="nav-link" href="relatorioproxs.php">Relatório das proximas semanas</a>
                 <a class="nav-link" href="relatoriof.php">Relatório de Tarefas Finalizadas</a>
               </nav>  
             </div>
